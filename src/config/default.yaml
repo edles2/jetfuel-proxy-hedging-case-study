@@ -1,0 +1,107 @@
+data:
+  frequency: B
+  max_ffill_gap_days: 5
+  fred_cache_dir: data/raw/fred
+  fred:
+    series_ids:
+      jet_fuel_benchmark: DJFUELUSGULF
+      proxy_diesel_us_gulf: DDFUELUSGULF
+      proxy_heating_oil_nyh: DHOILNYH
+      proxy_brent_spot: DCOILBRENTEU
+      proxy_wti_spot: DCOILWTICO
+      proxy_gasoline_nyh: DGASNYH
+
+date_range:
+  start: "2006-01-01"
+  end: null
+  end_offset_days: 7
+
+returns_type: simple
+
+features:
+  max_lag: 3
+  rolling_windows: [20, 60]
+  include_return_spreads: true
+  include_price_spreads: true
+  include_pca: false
+  pca_components: 2
+  pca_min_history: 60
+  dropna: true
+
+illiquid_hub:
+  basis_ar_coeff: 0.985
+  basis_process_sigma: 0.0018
+  regime_shift_probability: 0.012
+  regime_shift_sigma: 0.02
+  idiosyncratic_base_sigma: 0.0025
+  heteroskedastic_scale: 10.0
+  missingness_probability: 0.01
+  delayed_update_probability: 0.04
+  delay_max_days: 3
+  seed: 2026
+
+transaction_costs:
+  default_scenario: med
+  scenarios:
+    low:
+      spread_bps: 0.5
+      fixed_fee: 0.0
+    med:
+      spread_bps: 2.0
+      fixed_fee: 0.00005
+    high:
+      spread_bps: 5.0
+      fixed_fee: 0.0002
+
+hedging:
+  rebalance_frequency: daily
+  exposure_notional: 1.0
+  cost_scenario: med
+  constraints:
+    max_abs_beta: 3.0
+    leverage_cap: 5.0
+
+models:
+  single_static_ols:
+    max_abs_hedge_ratio: 3.0
+  multi_proxy_ridge:
+    alphas: [0.0001, 0.001, 0.01, 0.1, 1.0]
+    cv_splits: 5
+    max_abs_hedge_ratio: 3.0
+  multi_proxy_kalman:
+    calibrate: true
+    process_noise: 0.0001
+    observation_noise: 0.001
+    process_noise_grid: [0.000001, 0.00001, 0.0001, 0.001]
+    observation_noise_grid: [0.0001, 0.001, 0.01]
+    max_abs_hedge_ratio: 3.0
+
+walk_forward:
+  splits:
+    - name: wf_1
+      train_start: "2006-01-03"
+      train_end: "2014-12-31"
+      val_start: "2015-01-02"
+      val_end: "2017-12-29"
+      test_start: "2018-01-02"
+      test_end: "2020-12-31"
+    - name: wf_2
+      train_start: "2009-01-02"
+      train_end: "2017-12-29"
+      val_start: "2018-01-02"
+      val_end: "2020-12-31"
+      test_start: "2021-01-04"
+      test_end: "2023-12-29"
+    - name: wf_3
+      train_start: "2012-01-03"
+      train_end: "2020-12-31"
+      val_start: "2021-01-04"
+      val_end: "2023-12-29"
+      test_start: "2024-01-02"
+      test_end: "2025-12-31"
+
+evaluation:
+  rolling_window: 60
+  proxy_diagnostic_window: 60
+  var_confidence: 0.95
+  periods_per_year: 252

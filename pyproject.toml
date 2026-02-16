@@ -1,0 +1,56 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "proxy-hedging-case-study"
+version = "0.1.0"
+description = "Reproducible proxy hedging case study for airline jet fuel exposure"
+readme = "README.md"
+requires-python = ">=3.11,<3.12"
+dependencies = [
+  "numpy>=1.26",
+  "pandas>=2.2",
+  "matplotlib>=3.8",
+  "pyyaml>=6.0",
+  "requests>=2.31",
+  "statsmodels>=0.14",
+  "scikit-learn>=1.4",
+]
+
+[project.optional-dependencies]
+dev = [
+  "black>=24.10",
+  "isort>=5.13",
+  "pre-commit>=4.0",
+  "pytest>=8.3",
+  "ruff>=0.9",
+]
+
+[project.scripts]
+run-pipeline = "pipeline:main"
+run-experiments = "run_experiments:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.black]
+line-length = 88
+target-version = ["py311"]
+
+[tool.isort]
+profile = "black"
+line_length = 88
+src_paths = ["src", "tests"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
