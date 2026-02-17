@@ -86,3 +86,9 @@ def test_generate_evaluation_artifacts_writes_tables_and_figures(tmp_path) -> No
         reports_dir / "figures" / "kalman_dynamic_rolling_effectiveness.png"
     ).exists()
     assert (reports_dir / "figures" / "kalman_dynamic_hedge_ratios.png").exists()
+
+    # Canonical stable filenames used by CASE_STUDY.md
+    assert (reports_dir / "figures" / "cum_pnl.png").exists()
+    assert (reports_dir / "figures" / "hedge_ratios.png").exists()
+    assert (reports_dir / "figures" / "rolling_effectiveness.png").exists()
+    assert (reports_dir / "figures" / "pnl_distribution.png").exists()

@@ -1,5 +1,13 @@
 # Public-Data Proxy Hedging Case Study (Airline Jet Fuel Exposure)
 
+## Start Here
+- Canonical end-to-end thesis report: [reports/CASE_STUDY.md](reports/CASE_STUDY.md)
+- Reproduce everything with one command:
+
+```bash
+python -m src.run_experiments --config src/config/default.yaml
+```
+
 ## Problem Statement
 Airlines are exposed to jet fuel price risk, but true illiquid exposure hubs are often not observable or tradable with deep liquidity. This repository reproduces a **proxy hedging** case study using only public data, with fully automated ingestion and no API keys.
 
