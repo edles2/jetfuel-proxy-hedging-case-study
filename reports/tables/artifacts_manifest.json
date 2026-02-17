@@ -1,46 +1,30 @@
 {
-  "created_at_utc": "2026-02-16T15:00:49.895602+00:00",
+  "created_at_utc": "2026-02-17T14:41:17.778311+00:00",
   "config_path": "src/config/default.yaml",
-  "git_commit_hash": null,
+  "git_commit_hash": "539720c9ba5b37d66d7841e242075d901c86e044",
   "config": {
     "data": {
-      "raw_dir": "data/raw",
-      "date_column": "Date",
-      "price_column": "Price",
-      "allow_synthetic_fallback": true,
-      "synthetic_seed": 42,
-      "synthetic_start_date": "2021-01-01",
-      "synthetic_n_days": 900,
-      "target": {
-        "name": "jet_fuel_illiquid",
-        "file": "jet_fuel_illiquid.csv"
-      },
-      "proxies": [
-        {
-          "name": "proxy_1",
-          "file": "proxy_1.csv"
-        },
-        {
-          "name": "proxy_2",
-          "file": "proxy_2.csv"
+      "frequency": "B",
+      "max_ffill_gap_days": 5,
+      "fred_cache_dir": "data/raw/fred",
+      "fred": {
+        "series_ids": {
+          "jet_fuel_benchmark": "DJFUELUSGULF",
+          "proxy_diesel_us_gulf": "DDFUELUSGULF",
+          "proxy_heating_oil_nyh": "DHOILNYH",
+          "proxy_brent_spot": "DCOILBRENTEU",
+          "proxy_wti_spot": "DCOILWTICO",
+          "proxy_gasoline_nyh": "DGASNYH"
         }
-      ]
+      }
     },
     "date_range": {
-      "start": "2021-01-01",
-      "end": "2024-12-31"
+      "start": "2006-01-01",
+      "end": null,
+      "end_offset_days": 7
     },
-    "frequency": "B",
-    "missing_data_policy": {
-      "method": "ffill_then_drop",
-      "max_forward_fill": 2
-    },
+    "returns_type": "simple",
     "features": {
-      "target_column": "jet_fuel_illiquid",
-      "proxy_columns": [
-        "proxy_1",
-        "proxy_2"
-      ],
       "max_lag": 3,
       "rolling_windows": [
         20,
@@ -52,6 +36,18 @@
       "pca_components": 2,
       "pca_min_history": 60,
       "dropna": true
+    },
+    "illiquid_hub": {
+      "basis_ar_coeff": 0.985,
+      "basis_process_sigma": 0.0018,
+      "regime_shift_probability": 0.012,
+      "regime_shift_sigma": 0.02,
+      "idiosyncratic_base_sigma": 0.0025,
+      "heteroskedastic_scale": 10.0,
+      "missingness_probability": 0.01,
+      "delayed_update_probability": 0.04,
+      "delay_max_days": 3,
+      "seed": 2026
     },
     "transaction_costs": {
       "default_scenario": "med",
@@ -70,19 +66,6 @@
         }
       }
     },
-    "walk_forward": {
-      "splits": [
-        {
-          "name": "split_1",
-          "train_start": "2021-01-01",
-          "train_end": "2022-12-30",
-          "val_start": "2023-01-02",
-          "val_end": "2023-12-29",
-          "test_start": "2024-01-01",
-          "test_end": "2024-12-31"
-        }
-      ]
-    },
     "hedging": {
       "rebalance_frequency": "daily",
       "exposure_notional": 1.0,
@@ -93,16 +76,10 @@
       }
     },
     "models": {
-      "single_proxy": "proxy_1",
-      "static_ols": {
+      "single_static_ols": {
         "max_abs_hedge_ratio": 3.0
       },
-      "rolling_ols": {
-        "window": 60,
-        "refit_frequency": 5,
-        "max_abs_hedge_ratio": 3.0
-      },
-      "ridge": {
+      "multi_proxy_ridge": {
         "alphas": [
           0.0001,
           0.001,
@@ -113,7 +90,7 @@
         "cv_splits": 5,
         "max_abs_hedge_ratio": 3.0
       },
-      "kalman": {
+      "multi_proxy_kalman": {
         "calibrate": true,
         "process_noise": 0.0001,
         "observation_noise": 0.001,
@@ -131,24 +108,68 @@
         "max_abs_hedge_ratio": 3.0
       }
     },
+    "walk_forward": {
+      "splits": [
+        {
+          "name": "wf_1",
+          "train_start": "2006-01-03",
+          "train_end": "2014-12-31",
+          "val_start": "2015-01-02",
+          "val_end": "2017-12-29",
+          "test_start": "2018-01-02",
+          "test_end": "2020-12-31"
+        },
+        {
+          "name": "wf_2",
+          "train_start": "2009-01-02",
+          "train_end": "2017-12-29",
+          "val_start": "2018-01-02",
+          "val_end": "2020-12-31",
+          "test_start": "2021-01-04",
+          "test_end": "2023-12-29"
+        },
+        {
+          "name": "wf_3",
+          "train_start": "2012-01-03",
+          "train_end": "2020-12-31",
+          "val_start": "2021-01-04",
+          "val_end": "2023-12-29",
+          "test_start": "2024-01-02",
+          "test_end": "2025-12-31"
+        }
+      ]
+    },
     "evaluation": {
       "rolling_window": 60,
+      "proxy_diagnostic_window": 60,
       "var_confidence": 0.95,
       "periods_per_year": 252
     }
   },
-  "feature_dataset_index_size": 982,
+  "data_window": {
+    "start_date": "2006-01-01",
+    "end_date": "2026-02-10"
+  },
   "artifacts": {
     "tables": [
+      "reports/tables/artifacts_manifest.json",
+      "reports/tables/beta_stability.csv",
+      "reports/tables/cheap_benchmark_direct_pnl.csv",
       "reports/tables/feature_dataset.csv",
       "reports/tables/method_comparison.csv",
       "reports/tables/multi_proxy_kalman_pnl.csv",
       "reports/tables/multi_proxy_ridge_pnl.csv",
+      "reports/tables/rolling_correlations.csv",
       "reports/tables/single_rolling_ols_pnl.csv",
+      "reports/tables/single_static_ols_best_proxy_pnl.csv",
       "reports/tables/single_static_ols_pnl.csv",
       "reports/tables/walk_forward_splits.csv"
     ],
     "figures": [
+      "reports/figures/cheap_benchmark_direct_cumulative_pnl.png",
+      "reports/figures/cheap_benchmark_direct_hedge_ratios.png",
+      "reports/figures/cheap_benchmark_direct_pnl_histogram.png",
+      "reports/figures/cheap_benchmark_direct_rolling_effectiveness.png",
       "reports/figures/cumulative_returns.png",
       "reports/figures/multi_proxy_kalman_cumulative_pnl.png",
       "reports/figures/multi_proxy_kalman_hedge_ratios.png",
@@ -158,10 +179,15 @@
       "reports/figures/multi_proxy_ridge_hedge_ratios.png",
       "reports/figures/multi_proxy_ridge_pnl_histogram.png",
       "reports/figures/multi_proxy_ridge_rolling_effectiveness.png",
+      "reports/figures/proxy_rolling_correlations.png",
       "reports/figures/single_rolling_ols_cumulative_pnl.png",
       "reports/figures/single_rolling_ols_hedge_ratios.png",
       "reports/figures/single_rolling_ols_pnl_histogram.png",
       "reports/figures/single_rolling_ols_rolling_effectiveness.png",
+      "reports/figures/single_static_ols_best_proxy_cumulative_pnl.png",
+      "reports/figures/single_static_ols_best_proxy_hedge_ratios.png",
+      "reports/figures/single_static_ols_best_proxy_pnl_histogram.png",
+      "reports/figures/single_static_ols_best_proxy_rolling_effectiveness.png",
       "reports/figures/single_static_ols_cumulative_pnl.png",
       "reports/figures/single_static_ols_hedge_ratios.png",
       "reports/figures/single_static_ols_pnl_histogram.png",
